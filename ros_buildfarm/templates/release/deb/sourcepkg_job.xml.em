@@ -112,17 +112,36 @@ but disabled since the package is blacklisted (or not whitelisted) in the config
         'mkdir -p $WORKSPACE/sourcedeb/source',
         '# If using Podman, change the user namespace to preserve UID. No effect if using Docker.',
         'export PODMAN_USERNS=keep-id',
-        'docker run' +
-        ' --rm ' +
+        'docker create' +
         ' --cidfile=$WORKSPACE/docker_sourcedeb/docker.cid' +
         ' -e=TRAVIS=$TRAVIS' +
         ' --net=host' +
-        ' -v $WORKSPACE/ros_buildfarm:/tmp/ros_buildfarm:ro' +
-        ' -v $WORKSPACE/sourcedeb:/tmp/sourcedeb' +
         (' -v $HOME/.ssh/known_hosts:/etc/ssh/ssh_known_hosts:ro' +
          ' -v $SSH_AUTH_SOCK:/tmp/ssh_auth_sock' +
          ' -e SSH_AUTH_SOCK=/tmp/ssh_auth_sock' if git_ssh_credential_id else '') +
-        ' sourcedeb.%s_%s_%s_%s' % (rosdistro_name, os_name, os_code_name, pkg_name),
+        ' sourcedeb.%s_%s_%s_%s' % (rosdistro_name, os_name, os_code_name, pkg_name) +
+        ' &&',
+        'docker cp' +
+        ' "$WORKSPACE/ros_buildfarm"' +
+        ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid):/tmp/ros_buildfarm"' +
+        ' &&',
+        'docker cp' +
+        ' "$WORKSPACE/sourcedeb"' +
+        ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid):/tmp/sourcedeb"' +
+        ' &&',
+        'docker start' +
+        ' -ai'+
+        ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid)"' +
+        ' &&',
+        'docker cp' +
+        ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid):/tmp/ros_buildfarm/."' +
+        ' "$WORKSPACE/ros_buildfarm"' +
+        ' &&',
+        'docker cp' +
+        ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid):/tmp/sourcedeb/."' +
+        ' "$WORKSPACE/sourcedeb"',
+        'docker rm ' +
+        ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid)"',
         'echo "# END SECTION"',
     ]),
 ))@
