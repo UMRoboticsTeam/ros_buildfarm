@@ -134,17 +134,38 @@ but disabled since the package is blacklisted (or not whitelisted) in the config
     ] if shared_ccache else []) + [
         '# If using Podman, change the user namespace to preserve UID. No effect if using Docker.',
         'export PODMAN_USERNS=keep-id',
-        'docker run' +
-        ' --rm ' +
+        'docker create' +
         ' --cidfile=$WORKSPACE/docker_generating_docker/docker.cid' +
         ' -e=TRAVIS=$TRAVIS' +
         ' --net=host' +
         ' -e=ROS_BUILDFARM_PULL_REQUEST_BRANCH=$ROS_BUILDFARM_PULL_REQUEST_BRANCH' +
-        ' -v $WORKSPACE/ros_buildfarm:/tmp/ros_buildfarm:ro' +
-        ' -v $WORKSPACE/binarydeb:/tmp/binarydeb' +
-        ' -v $WORKSPACE/docker_build_binarydeb:/tmp/docker_build_binarydeb' +
         (' -v $HOME/.ccache:/home/buildfarm/.ccache' if shared_ccache else '') +
-        ' binarydeb_task_generation.%s_%s_%s_%s_%s' % (rosdistro_name, os_name, os_code_name, arch, pkg_name),
+        ' binarydeb_task_generation.%s_%s_%s_%s_%s' % (rosdistro_name, os_name, os_code_name, arch, pkg_name) +
+        ' &&',
+        'docker cp' +
+        ' "$WORKSPACE/ros_buildfarm"' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/ros_buildfarm"' +
+        ' &&',
+        'docker cp' +
+        ' "$WORKSPACE/binarydeb"' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/binarydeb"' +
+        ' &&',
+        'docker cp' +
+        ' "$WORKSPACE/docker_build_binarydeb"' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/docker_build_binarydeb"',
+        'docker start' +
+        ' -ai' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid)"' +
+        ' &&',
+        'docker cp' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/binarydeb"' +
+        ' "$WORKSPACE/binarydeb"' +
+        ' &&',
+        'docker cp' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/docker_build_binarydeb"' +
+        ' "$WORKSPACE/docker_build_binarydeb"',
+        'docker rm' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid)"',
         'echo "# END SECTION"',
     ]),
 ))@
@@ -171,16 +192,31 @@ but disabled since the package is blacklisted (or not whitelisted) in the config
     ] if shared_ccache else []) + [
         '# If using Podman, change the user namespace to preserve UID. No effect if using Docker.',
         'export PODMAN_USERNS=keep-id',
-        'docker run' +
-        ' --rm ' +
+        'docker create' +
         ' --cidfile=$WORKSPACE/docker_build_binarydeb/docker.cid' +
         ' -e=HOME=/home/buildfarm' +
         ' -e=TRAVIS=$TRAVIS' +
         ' --net=host' +
-        ' -v $WORKSPACE/ros_buildfarm:/tmp/ros_buildfarm:ro' +
-        ' -v $WORKSPACE/binarydeb:/tmp/binarydeb' +
         (' -v $HOME/.ccache:/home/buildfarm/.ccache' if shared_ccache else '') +
-        ' binarydeb_build.%s_%s_%s_%s_%s' % (rosdistro_name, os_name, os_code_name, arch, pkg_name),
+        ' binarydeb_build.%s_%s_%s_%s_%s' % (rosdistro_name, os_name, os_code_name, arch, pkg_name) +
+        ' &&',
+        'docker cp' +
+        ' "$WORKSPACE/ros_buildfarm"' +
+        ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid):/tmp/ros_buildfarm"' +
+        ' &&',
+        'docker cp' +
+        ' "$WORKSPACE/binarydeb"' +
+        ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid):/tmp/binarydeb"' +
+        ' &&',
+        'docker start' +
+        ' -ai' +
+        ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid)"' +
+        ' &&',
+        'docker cp' +
+        ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid):/tmp/binarydeb"' +
+        ' "$WORKSPACE/binarydeb"',
+        'docker rm' +
+        ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid)"',
         'echo "# END SECTION"',
     ]),
 ))@
