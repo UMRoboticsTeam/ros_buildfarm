@@ -134,13 +134,9 @@ but disabled since the package is blacklisted (or not whitelisted) in the config
         ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid)"' +
         ' &&',
         'docker cp' +
-        ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid):/tmp/ros_buildfarm/."' +
-        ' "$WORKSPACE/ros_buildfarm"' +
-        ' &&',
-        'docker cp' +
         ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid):/tmp/sourcedeb/."' +
         ' "$WORKSPACE/sourcedeb"',
-        'docker rm ' +
+        'docker rm' +
         ' "$(cat $WORKSPACE/docker_sourcedeb/docker.cid)"',
         'echo "# END SECTION"',
     ]),
