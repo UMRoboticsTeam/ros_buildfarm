@@ -158,11 +158,11 @@ but disabled since the package is blacklisted (or not whitelisted) in the config
         ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid)"' +
         ' &&',
         'docker cp' +
-        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/binarydeb"' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/binarydeb/."' +
         ' "$WORKSPACE/binarydeb"' +
         ' &&',
         'docker cp' +
-        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/docker_build_binarydeb"' +
+        ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid):/tmp/docker_build_binarydeb/."' +
         ' "$WORKSPACE/docker_build_binarydeb"',
         'docker rm' +
         ' "$(cat $WORKSPACE/docker_generating_docker/docker.cid)"',
@@ -213,7 +213,7 @@ but disabled since the package is blacklisted (or not whitelisted) in the config
         ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid)"' +
         ' &&',
         'docker cp' +
-        ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid):/tmp/binarydeb"' +
+        ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid):/tmp/binarydeb/."' +
         ' "$WORKSPACE/binarydeb"',
         'docker rm' +
         ' "$(cat $WORKSPACE/docker_build_binarydeb/docker.cid)"',
